@@ -1,4 +1,4 @@
-import { closeByButton, makePopupVisible } from "./popup_functions";
+import { openModal, closeModal } from './modal.js';
 
 const initialCards = [
   {
@@ -33,35 +33,15 @@ const initialCards = [
   }
 ];
 
-// Темплейт карточки
-const cardTemplate = document.querySelector("#card-template").content;
-
-// DOM узлы
-const cardsList = document.querySelector(".places__list");
-
-function openCard (card) {
-    const cardPopup = document.querySelector(".popup_type_image");
-
-    closeByButton(cardPopup);
-
-    const cardImage = card.querySelector(".card__image");
-    const cardTitle = card.querySelector(".card__title");
-    cardImage.addEventListener("click", function (evt) {
-      cardPopup.querySelector(".popup__caption").textContent = cardTitle.textContent;
-      cardPopup.querySelector(".popup__image").src = cardImage.src;
-      cardPopup.querySelector(".popup__image").alt = cardImage.alt;
-      makePopupVisible(cardPopup);
-    });
-}
-
 // Функция создания карточки
-function addCard (imgSrc, title, description = undefined, removeFunction = removeCard) {
+function addCard (cardTemplate, cardsList, imgSrc, title,
+  description = undefined, removeFunction = removeCard, likeFunction = likeCard) {
     const card = cardTemplate.cloneNode(true);
     card.querySelector(".card__image").src = imgSrc;
     card.querySelector(".card__image").alt = description ? description : title;
     card.querySelector(".card__title").textContent = title;
     card.querySelector(".card__delete-button").addEventListener("click", removeFunction);
-    openCard(card);
+    card.querySelector(".card__like-button").addEventListener("click", likeFunction);
     cardsList.append(card);
     return card;
 };
@@ -71,11 +51,13 @@ function removeCard (event) {
     event.target.closest(".card").remove();
 };
 
-function addInitialCards (cardsList) {
-  // Вывести карточки на страницу
-  cardsList.forEach(function (item) {
-    addCard(item.link, item.name, item.description);
-  });
-};
 
-export { addCard, removeCard, addInitialCards, initialCards };
+function likeCard (evt) {
+  if (evt.target.classList.contains('card__like-button_is-active')) {
+    evt.target.classList.remove('card__like-button_is-active');
+  } else {
+    evt.target.classList.add('card__like-button_is-active');
+  };
+}
+
+export { addCard, removeCard, likeCard, initialCards };
