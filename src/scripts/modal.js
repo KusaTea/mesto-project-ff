@@ -1,4 +1,4 @@
-export function openModal (popup, additionalCallback = undefined) {
+function openModal (popup, additionalCallback = undefined) {
 
     if (additionalCallback) {
         additionalCallback();
@@ -6,51 +6,29 @@ export function openModal (popup, additionalCallback = undefined) {
 
     popup.classList.add('popup_is-opened');
 
-    popup.querySelector('.popup__close').addEventListener('click', function (evt) {
-        closeModal(popup);
-    });
-    document.addEventListener('keydown', function (evt) {
-        if (evt.key === 'Escape') {
-            closeModal(popup);
-        };
-    });
-    popup.addEventListener('click', function (evt) {
-        closeModal(popup);
-    });
-    popup.querySelector('.popup__content').addEventListener('click', function (evt) {
-        evt.stopImmediatePropagation();
-    });
+    document.addEventListener('keydown', escapeHandleByKey);
 };
 
 
-export function closeModal (popup) {
+function closeModal (popup) {
     popup.classList.remove('popup_is-opened');
     
     if (popup.querySelector("form")) {
         popup.querySelector("form").reset();
     };
-    document.removeEventListener('keydown', function (evt) {
-        if (evt.key === 'Escape') {
-            closePopup(popup);
-        };
-    });
-    document.removeEventListener('click', function (evt) {
-        closeModal(popup);
-    });
-    popup.removeEventListener('click', function (evt) {
-        closeModal(popup);
-    });
-    popup.querySelector('.popup__content').removeEventListener('click', function (evt) {
-        evt.stopImmediatePropagation();
-    });
-    popup.querySelector('.popup__close').removeEventListener('click', function (evt) {
-        closeModal(popup);
-    });
+    document.removeEventListener('keydown', escapeHandleByKey);
 };
 
 
-export function addFunctionalToSubmitButton (popup, additionalCallback = undefined) {
-    popup.querySelector('.popup__button').addEventListener('click', function (evt) {
+function escapeHandleByKey (evt) {
+    if (evt.key === 'Escape') {
+        closeModal(document.querySelector('.popup_is-opened'));
+    };
+};
+
+
+function addFunctionalToSubmit (popup, additionalCallback = undefined) {
+    popup.querySelector('form').addEventListener('submit', function (evt) {
         evt.preventDefault();
         if (additionalCallback) {
             additionalCallback();
@@ -58,3 +36,6 @@ export function addFunctionalToSubmitButton (popup, additionalCallback = undefin
         closeModal(popup);
     });
 };
+
+
+export { openModal, closeModal, addFunctionalToSubmit }
