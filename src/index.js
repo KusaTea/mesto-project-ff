@@ -1,5 +1,5 @@
 import './pages/index.css';
-import { createCard, likeCard, removeCard, openCardWrapper } from './scripts/cards.js';
+import { createCard, likeCard, removeCard } from './scripts/cards.js';
 import { openModal, closeModal, addFunctionalToSubmit } from './scripts/modal.js';;
 import { initialCards } from './scripts/initialCards.js'
 
@@ -19,7 +19,7 @@ const currentName = document.querySelector(".profile__title")
 const currentJob = document.querySelector(".profile__description")
 const editProfileForm = document.forms['edit-profile'];
 
-addFunctionalToSubmit(profilePopup, function () {
+addFunctionalToSubmit(profilePopup, editProfileForm, function () {
     if (editProfileForm.name.value && editProfileForm.description.value) {
         currentName.textContent = editProfileForm.name.value;
         currentJob.textContent = editProfileForm.description.value;
@@ -40,7 +40,15 @@ profileButton.addEventListener('click', function (evt) {
 const cardTemplate = document.querySelector("#card-template").content; // Темплейт карточки
 const cardsList = document.querySelector(".places__list");
 const cardPopup = document.querySelector(".popup_type_image");
-const openCard = openCardWrapper(cardPopup, openModal);
+const popupImage = cardPopup.querySelector(".popup__image");
+const popupCaprion = cardPopup.querySelector(".popup__caption");
+
+function openCard (imgSrc, title) {
+    popupImage.src = imgSrc;
+    popupImage.alt = title;
+    popupCaprion.textContent = title;
+    openModal(cardPopup);
+  }
 
 
 initialCards.forEach(function (item) {
@@ -65,7 +73,7 @@ const plusCard = document.querySelector(".profile__add-button");
 const cardForm = document.forms['new-place'];
 
 
-addFunctionalToSubmit(plusPopup, function () {
+addFunctionalToSubmit(plusPopup, cardForm, function () {
     if (cardForm['link'].value && cardForm['place-name'].value) {
         cardsList.prepend(
             createCard({

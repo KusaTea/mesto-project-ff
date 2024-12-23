@@ -12,10 +12,6 @@ function openModal (popup, additionalCallback = undefined) {
 
 function closeModal (popup) {
     popup.classList.remove('popup_is-opened');
-    
-    if (popup.querySelector("form")) {
-        popup.querySelector("form").reset();
-    };
     document.removeEventListener('keydown', escapeHandleByKey);
 };
 
@@ -27,12 +23,13 @@ function escapeHandleByKey (evt) {
 };
 
 
-function addFunctionalToSubmit (popup, additionalCallback = undefined) {
-    popup.querySelector('form').addEventListener('submit', function (evt) {
+function addFunctionalToSubmit (popup, form, additionalCallback = undefined) {
+    form.addEventListener('submit', function (evt) {
         evt.preventDefault();
         if (additionalCallback) {
             additionalCallback();
         };
+        form.reset();
         closeModal(popup);
     });
 };
