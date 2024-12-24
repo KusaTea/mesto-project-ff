@@ -18,6 +18,7 @@ const profilePopup = document.querySelector(".popup_type_edit");
 const currentName = document.querySelector(".profile__title")
 const currentJob = document.querySelector(".profile__description")
 const editProfileForm = document.forms['edit-profile'];
+console.log(editProfileForm.elements);
 
 addFunctionalToSubmit(profilePopup, editProfileForm, function () {
     if (editProfileForm.name.value && editProfileForm.description.value) {
