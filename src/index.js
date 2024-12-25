@@ -1,9 +1,8 @@
 import './pages/index.css';
-import { createCard, likeCard, removeCard } from './scripts/cards.js';
+import { createCard } from './scripts/cards.js';
 import { openModal, closeModal, addFunctionalToSubmit } from './scripts/modal.js';;
-import { initialCards } from './scripts/initialCards.js'
 import { enableValidation, clearValidation } from './scripts/validation.js'
-import { getUserInfo, getInitialCards, getInitialInformation, changeProfileInfo } from './scripts/api.js';
+import { getUserInfo, getInitialInformation, changeProfileInfo, sendNewCard, removeCard, likeCard, changeAvatar, renderLoading } from './scripts/api.js';
 
 const formInfoObj = {
     formSelector: '.popup__form',
@@ -32,12 +31,21 @@ const profilePopup = document.querySelector(".popup_type_edit");
 const currentName = document.querySelector(".profile__title")
 const currentJob = document.querySelector(".profile__description")
 const editProfileForm = document.forms['edit-profile'];
+const profilePopupButton = profilePopup.querySelector(".popup__button");
 
 addFunctionalToSubmit(profilePopup, editProfileForm, function () {
-    if (editProfileForm.name.value && editProfileForm.description.value) {
-        currentName.textContent = editProfileForm.name.value;
-        currentJob.textContent = editProfileForm.description.value;
-    };
+    renderLoading(true, profilePopupButton);
+    changeProfileInfo(editProfileForm.name.value, editProfileForm.description.value)
+        .then((data) => {
+            if (data) {
+                currentName.textContent = data.name;
+                currentJob.textContent = data.about;
+            } else {
+                Promise.reject('Ошибка')
+            }
+        })
+        .catch((err) => console.log(err))
+        .finally(() => renderLoading(false, profilePopupButton));
 });
 
 
@@ -66,31 +74,43 @@ function openCard (imgSrc, title) {
   }
 
 
-initialCards.forEach(function (item) {
-    
-});
-
-
 const plusPopup = document.querySelector(".popup_type_new-card");
 const plusCard = document.querySelector(".profile__add-button");
 const cardForm = document.forms['new-place'];
-
+const plusPopupButton = plusPopup.querySelector(".popup__button");
 
 addFunctionalToSubmit(plusPopup, cardForm, function () {
-    if (cardForm['link'].value && cardForm['place-name'].value) {
-        cardsList.prepend(
-            createCard({
-                cardTemplate: cardTemplate,
-                imgSrc: cardForm['link'].value,
-                title: cardForm['place-name'].value
-            },
-            {
-                removeFunction: removeCard,
-                likeFunction: likeCard,
-                openFunction: openCard
-            }),
-        );
-    };
+    renderLoading(true, plusPopupButton);
+    sendNewCard(cardForm['place-name'].value, cardForm['link'].value)
+        .then((data) => {
+            if (data) {
+                getUserInfo()
+                .then((user) => {
+                    cardsList.prepend(
+                        createCard({
+                            cardTemplate: cardTemplate,
+                            imgSrc: data.link,
+                            title: data.name,
+                            likes: data.likes,
+                            id: data._id
+                        },
+                        {
+                            removeFunction: removeCard,
+                            likeFunction: likeCard,
+                            openFunction: openCard
+                        },
+                        {
+                            cardOwner: data.owner._id,
+                            currentUser: user._id
+                        }),
+                    );
+                })
+            } else {
+                Promise.reject('Ошибка');
+            }
+        })
+        .catch((err) => console.log(err))
+        .finally(() => renderLoading(false, plusPopupButton));
 });
 
 
@@ -100,6 +120,34 @@ plusCard.addEventListener('click', function (evt) {
 });
 
 
+// Avatar
+const avatarPopup = document.querySelector(".popup_edit_avatar");
+const avatarIcon = document.querySelector(".profile__image");
+const avatarForm = document.forms['edit-avatar'];
+const avatarPopupButton = avatarPopup.querySelector('.popup__button');
+
+avatarIcon.addEventListener('click', function (evt) {
+    openModal(avatarPopup, function () {
+        clearValidation(avatarForm, formInfoObj);
+    });
+});
+
+addFunctionalToSubmit(avatarPopup, avatarForm, function () {
+    renderLoading(true, avatarPopupButton);
+    changeAvatar(avatarForm.avatar.value)
+        .then((data) => {
+            if (data) {
+                avatarIcon.setAttribute('style', `background-image: url(${data.avatar});`);
+            } else {
+                Promise.reject('Ошибка');
+            };
+        })
+        .catch(err => console.log(err))
+        .finally(() => renderLoading(false, avatarPopupButton));
+    });
+
+
+// Initial information
 getInitialInformation()
     .then((res) => {
         return {userInfo: res[0].json(), cardsInfo: res[1].json()};
@@ -108,22 +156,29 @@ getInitialInformation()
         resObj.userInfo.then((user) => {
             currentName.textContent = user.name;
             currentJob.textContent = user.about;
-        });
-        resObj.cardsInfo.then((cards) => {
-            cards.forEach((item) => {
-                cardsList.prepend(
-                    createCard({
-                        cardTemplate: cardTemplate,
-                        imgSrc: item.link,
-                        title: item.name,
-                        description: item.description
-                    },
-                    {
-                        removeFunction: removeCard,
-                        likeFunction: likeCard,
-                        openFunction: openCard
-                    })
-                )
+            avatarIcon.setAttribute('style', `background-image: url(${user.avatar});`);
+            resObj.cardsInfo.then((cards) => {
+                cards.forEach((item) => {
+                    cardsList.prepend(
+                        createCard({
+                            cardTemplate: cardTemplate,
+                            imgSrc: item.link,
+                            title: item.name,
+                            description: item.description,
+                            likes: item.likes,
+                            id: item._id
+                        },
+                        {
+                            removeFunction: removeCard,
+                            likeFunction: likeCard,
+                            openFunction: openCard
+                        },
+                        {
+                            cardOwner: item.owner._id,
+                            currentUser: user._id
+                        })
+                    )
+                });
             });
         });
     })
