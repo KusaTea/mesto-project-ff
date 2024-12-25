@@ -29,8 +29,8 @@ function addFunctionalToSubmit (popup, form, additionalCallback = undefined) {
         if (additionalCallback) {
             additionalCallback();
         };
-        form.reset();
         closeModal(popup);
+        form.reset();
     });
 };
 
