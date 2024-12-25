@@ -1,4 +1,4 @@
 # Проектная работа Mesto
 https://github.com/KusaTea/mesto-project-ff
-Ссылка на собранный проект:
-https://kusatea.github.io/mesto-project-ff
+\nСсылка на собранный проект:
+\nhttps://kusatea.github.io/mesto-project-ff
