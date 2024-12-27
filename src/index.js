@@ -14,9 +14,21 @@ const formInfoObj = {
     errorClass: 'popup__error_visible'
 };
 
+const cardClasses = {
+    card: '.card',
+    image: '.card__image',
+    deleteButton: '.card__delete-button',
+    description: '.card__description',
+    title: '.card__title',
+    likeButton: '.card__like-button',
+    likeCounter: '.card__like-number',
+    likeButtonActive: 'card__like-button_is-active'
+}
+
 
 const removeCard = removeCardWrapper(removeCardRequest, '.card');
-const likeCard = likeCardWrapper(likeCardRequest, '.card', 'card__like-button_is-active');
+const likeCard = likeCardWrapper(likeCardRequest, cardClasses);
+
 
 document.querySelectorAll('.popup').forEach((popup) => {
     popup.addEventListener('mousedown', function(evt) {
@@ -101,7 +113,8 @@ cardForm.addEventListener('submit', function (evt) {
                         imgSrc: data.link,
                         title: data.name,
                         likes: data.likes,
-                        id: data._id
+                        id: data._id,
+                        classes: cardClasses
                     },
                     {
                         removeFunction: removeCard,
@@ -167,35 +180,32 @@ avatarForm.addEventListener('submit', function (evt) {
 // Initial information
 getInitialInformation()
     .then((res) => {
-        return {userInfo: res[0].json(), cardsInfo: res[1].json()};
-    })
-    .then((resObj) => {
-        resObj.userInfo.then((user) => {
-            currentName.textContent = user.name;
-            currentJob.textContent = user.about;
-            avatarIcon.setAttribute('style', `background-image: url(${user.avatar});`);
-            resObj.cardsInfo.then((cards) => {
-                cards.forEach((item) => {
-                    cardsList.append(
-                        createCard({
-                            cardTemplate: cardTemplate,
-                            imgSrc: item.link,
-                            title: item.name,
-                            description: item.description,
-                            likes: item.likes,
-                            id: item._id
-                        },
-                        {
-                            removeFunction: removeCard,
-                            likeFunction: likeCard,
-                            openFunction: openCard
-                        },
-                        {
-                            cardOwner: item.owner._id,
-                            currentUser: user._id
-                        })
-                    )
-                });
-            });
+        const user = res[0];
+        const cards = res[1];
+        currentName.textContent = user.name;
+        currentJob.textContent = user.about
+        avatarIcon.setAttribute('style', `background-image: url(${user.avatar});`);
+        cards.forEach((item) => {
+            cardsList.append(
+                createCard({
+                    cardTemplate: cardTemplate,
+                    imgSrc: item.link,
+                    title: item.name,
+                    description: item.description,
+                    likes: item.likes,
+                    id: item._id,
+                    classes: cardClasses
+                },
+                {
+                    removeFunction: removeCard,
+                    likeFunction: likeCard,
+                    openFunction: openCard
+                },
+                {
+                    cardOwner: item.owner._id,
+                    currentUser: user._id
+                })
+            )
         });
     })
+    .catch((err) => console.log(`Ошибка: ${err}`));

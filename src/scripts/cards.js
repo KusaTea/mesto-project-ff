@@ -1,24 +1,24 @@
 // Функция создания карточки
 function createCard (cardInfo, cardFunctions, usersInfo) {
     const card = cardInfo.cardTemplate.cloneNode(true);
-    const cardImage = card.querySelector(".card__image");
-    const likeButton = card.querySelector(".card__like-button")
+    const cardImage = card.querySelector(cardInfo.classes.image);
+    const likeButton = card.querySelector(cardInfo.classes.likeButton)
     cardImage.src = cardInfo.imgSrc;
     cardImage.alt = cardInfo.description | cardInfo.title;
-    card.querySelector(".card__title").textContent = cardInfo.title;
+    card.querySelector(cardInfo.classes.title).textContent = cardInfo.title;
     if (usersInfo.currentUser === usersInfo.cardOwner) {
-      card.querySelector(".card__delete-button").addEventListener("click", cardFunctions.removeFunction);
+      card.querySelector(cardInfo.classes.deleteButton).addEventListener("click", cardFunctions.removeFunction);
     } else {
-      card.querySelector(".card__delete-button").remove();
+      card.querySelector(cardInfo.classes.deleteButton).remove();
     };
     if (Object.values(cardInfo.likes).some((likeOwner) => {
       return likeOwner._id === usersInfo.currentUser;
     })) {
-      likeButton.classList.add('card__like-button_is-active');
+      likeButton.classList.add(cardInfo.classes.likeButtonActive);
     };
     likeButton.addEventListener("click", cardFunctions.likeFunction);
-    card.querySelector('.card__like-number').textContent = cardInfo.likes.length;
-    card.querySelector('.card').setAttribute('data-id', cardInfo.id);
+    card.querySelector(cardInfo.classes.likeCounter).textContent = cardInfo.likes.length;
+    card.querySelector(cardInfo.classes.card).setAttribute('data-id', cardInfo.id);
     cardImage.addEventListener("click", () =>
       cardFunctions.openFunction(cardInfo.imgSrc, cardInfo.title));
     return card;
@@ -41,12 +41,13 @@ function removeCardWrapper (request, cardClass) {
 }
 
 
-function likeCardWrapper (request, cardClass, activeClass) {
+function likeCardWrapper (request, classes) {
   return (evt) => {
-    const card = evt.target.closest(cardClass);
-    request(card, evt.target,
-      evt.target.classList.contains(activeClass) ? 'DELETE' : 'PUT')
-      .then((data) => evt.target.classList.toggle(activeClass))
+    const card = evt.target.closest(classes.card);
+    request(card, evt.target.classList.contains(classes.likeButtonActive) ? 'DELETE' : 'PUT')
+      .then((data) => {
+        evt.target.classList.toggle(classes.likeButtonActive);
+        card.querySelector(classes.likeCounter).textContent = data.likes.length})
       .catch(err => console.log(err));
   }
 }

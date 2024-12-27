@@ -20,7 +20,7 @@ function getUserInfo () {
         method: 'GET',
         headers: {authorization: config.headers.authorization}
     })
-    .then(checkAnswer)
+    .then(checkAnswer);
 };
 
 function getInitialCards () {
@@ -28,12 +28,12 @@ function getInitialCards () {
         method: 'GET',
         headers: {authorization: config.headers.authorization}
     })
-    .then(checkAnswer)
+    .then(checkAnswer);
 }
 
 function getInitialInformation () {
     return Promise.all([getUserInfo(), getInitialCards()])
-        .then(res => res)
+        .then(res => res);
 }
 
 function changeProfileInfo (newName, newDescription) {
@@ -45,7 +45,7 @@ function changeProfileInfo (newName, newDescription) {
             about: newDescription
         })
     })
-    .then(checkAnswer)
+    .then(checkAnswer);
 }
 
 function sendNewCard (cardName, cardImageLink) {
@@ -57,23 +57,25 @@ function sendNewCard (cardName, cardImageLink) {
             link: cardImageLink
         })
     })
-    .then(checkAnswer)
+    .then(checkAnswer);
 }
 
 function removeCardRequest (card) {
-    fetch(config.baseUrl + `/cards/${card.dataset.id}`, {
+    return fetch(config.baseUrl + `/cards/${card.dataset.id}`, {
         method: 'DELETE',
         headers: {authorization: config.headers.authorization}
     })
-    .then(checkAnswer)
+    .then(checkAnswer);
 }
 
 function likeCardRequest (card, method) {
-    fetch(config.baseUrl + `/cards/likes/${card.dataset.id}`, {
+    return fetch(config.baseUrl + `/cards/likes/${card.dataset.id}`, {
         method: method,
         headers: {authorization: config.headers.authorization}
     })
-    .then(checkAnswer)
+    .then((res) => {
+        return res.json()
+    });
 }
 
 
@@ -85,14 +87,14 @@ function changeAvatar (link) {
             avatar: link
         })
     })
-    .then(checkAnswer)
+    .then(checkAnswer);
 }
 
 function renderLoading (isLoading, button) {
     if (isLoading) {
-      button.textContent = 'Сохранение...'
+      button.textContent = 'Сохранение...';
     } else {
-      button.textContent = 'Сохранить'
+      button.textContent = 'Сохранить';
     }
   }
 
