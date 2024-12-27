@@ -6,20 +6,21 @@ const config = {
     }
 };
 
+
+function checkAnswer (res) {
+    if (res.ok) {
+        return res.json();
+    };
+    return Promise.reject(`Ошибка: ${res.status}`);
+};
+
+
 function getUserInfo () {
     return fetch(config.baseUrl + '/users/me', {
         method: 'GET',
         headers: {authorization: config.headers.authorization}
     })
-    .then((res) => {
-        if (res.ok) {
-            return res;
-        };
-        return Promise.reject(`Ошибка: ${res.status}`);
-    })
-    .catch((err) => {
-        console.log(err);
-    });
+    .then(checkAnswer)
 };
 
 function getInitialCards () {
@@ -27,22 +28,12 @@ function getInitialCards () {
         method: 'GET',
         headers: {authorization: config.headers.authorization}
     })
-    .then((res) => {
-        if (res.ok) {
-            return res;
-        };
-        return Promise.reject(`Ошибка: ${res.status}`);
-    })
-    .catch((err) => {
-        console.log(err);
-    });;
+    .then(checkAnswer)
 }
 
 function getInitialInformation () {
     return Promise.all([getUserInfo(), getInitialCards()])
-        .then((res) => {
-                return res;
-        });
+        .then(res => res)
 }
 
 function changeProfileInfo (newName, newDescription) {
@@ -54,15 +45,7 @@ function changeProfileInfo (newName, newDescription) {
             about: newDescription
         })
     })
-    .then((res) => {
-        if (res.ok) {
-            return res.json()
-        };
-        return Promise.reject(`Ошибка: ${res.status}`);
-    })
-    .catch((err) => {
-        console.log(err);
-    });
+    .then(checkAnswer)
 }
 
 function sendNewCard (cardName, cardImageLink) {
@@ -74,61 +57,25 @@ function sendNewCard (cardName, cardImageLink) {
             link: cardImageLink
         })
     })
-    .then((res) => {
-        if (res.ok) {
-            return res.json();
-        };
-        return Promise.reject(`Ошибка: ${res.status}`);
-    })
-    .catch((err) => {
-        console.log(err);
-    });
+    .then(checkAnswer)
 }
 
-function removeCard (evt) {
-    const card = evt.target.closest(".card");
+function removeCardRequest (card) {
     fetch(config.baseUrl + `/cards/${card.dataset.id}`, {
         method: 'DELETE',
         headers: {authorization: config.headers.authorization}
     })
-        .then((res) => {
-            if (res.ok) {
-                card.remove();
-            } else {
-                Promise.reject(`Ошибка: ${res.status}`)
-            };
-        })
-        .catch((err) => {
-            console.log(err);
-        });
+    .then(checkAnswer)
 }
 
-function changeLike (card, button, method) {
+function likeCardRequest (card, method) {
     fetch(config.baseUrl + `/cards/likes/${card.dataset.id}`, {
         method: method,
         headers: {authorization: config.headers.authorization}
     })
-    .then((res) => {
-        if(res.ok) {
-            return res.json();
-        };
-        return Promise.reject(`Ошибка: ${res.status}`);
-    })
-    .then((data) => {
-        button.classList.toggle('card__like-button_is-active');
-        card.querySelector('.card__like-number').textContent = data.likes.length;
-    })
-    .catch((err) => console.log(err));
+    .then(checkAnswer)
 }
 
-function likeCard (evt) {
-    const card = evt.target.closest(".card");
-    if (evt.target.classList.contains('card__like-button_is-active')) {
-        changeLike(card, evt.target, 'DELETE');
-    } else {
-        changeLike(card, evt.target, 'PUT');
-    };
-  }
 
 function changeAvatar (link) {
     return fetch(config.baseUrl + '/users/me/avatar', {
@@ -138,15 +85,7 @@ function changeAvatar (link) {
             avatar: link
         })
     })
-    .then((res) => {
-        if (res.ok) {
-            return res.json();
-        };
-        return Promise.reject(`Ошибка: ${res.status}`);
-    })
-    .catch((err) => {
-        console.log(err);
-    });
+    .then(checkAnswer)
 }
 
 function renderLoading (isLoading, button) {
@@ -158,4 +97,4 @@ function renderLoading (isLoading, button) {
   }
 
 
-export { getInitialInformation, getUserInfo, changeProfileInfo, sendNewCard, removeCard, likeCard, changeAvatar, renderLoading }
+export { getInitialInformation, getUserInfo, changeProfileInfo, sendNewCard, removeCardRequest, likeCardRequest, changeAvatar, renderLoading }

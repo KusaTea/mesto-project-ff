@@ -23,16 +23,4 @@ function escapeHandleByKey (evt) {
 };
 
 
-function addFunctionalToSubmit (popup, form, additionalCallback = undefined) {
-    form.addEventListener('submit', function (evt) {
-        evt.preventDefault();
-        if (additionalCallback) {
-            additionalCallback();
-        };
-        closeModal(popup);
-        form.reset();
-    });
-};
-
-
-export { openModal, closeModal, addFunctionalToSubmit }
+export { openModal, closeModal }

@@ -24,10 +24,32 @@ function createCard (cardInfo, cardFunctions, usersInfo) {
     return card;
 };
 
-// Функция удаления карточки
-function removeCard (event) {
-    event.target.closest(".card").remove();
-};
+
+function removeCardWrapper (request, cardClass) {
+  return (evt) => {
+  const card = evt.target.closest(cardClass);
+  request(card)
+      .then((data) => {
+          if (data) {
+              card.remove();
+          } else {
+              Promise.reject('Ошибка')
+          }
+      })
+      .catch(err => console.log(err));
+    };
+}
 
 
-export { createCard };
+function likeCardWrapper (request, cardClass, activeClass) {
+  return (evt) => {
+    const card = evt.target.closest(cardClass);
+    request(card, evt.target,
+      evt.target.classList.contains(activeClass) ? 'DELETE' : 'PUT')
+      .then((data) => evt.target.classList.toggle(activeClass))
+      .catch(err => console.log(err));
+  }
+}
+
+
+export { createCard, removeCardWrapper, likeCardWrapper };

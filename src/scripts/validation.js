@@ -56,10 +56,9 @@ function clearValidation (form, formsInfoObj) {
         const inputList = Array.from(form.querySelectorAll(formsInfoObj.inputSelector));
         const submitButton = form.querySelector(formsInfoObj.submitButtonSelector);
         inputList.forEach((element) => {
-            element.classList.remove(formsInfoObj.inputErrorClass);
-            form.querySelector(`.${element.id}-error`).classList.remove(formsInfoObj.errorClass);
-            toggleSubmitButton(inputList, submitButton);
+            hideInputError({element: element}, {element: form.querySelector(`.${element.id}-error`)});
         });
+        toggleSubmitButton(inputList, submitButton);
     }
 };
 

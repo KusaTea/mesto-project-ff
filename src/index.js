@@ -1,8 +1,9 @@
 import './pages/index.css';
-import { createCard } from './scripts/cards.js';
-import { openModal, closeModal, addFunctionalToSubmit } from './scripts/modal.js';;
+import { createCard, removeCardWrapper, likeCardWrapper } from './scripts/cards.js';
+import { openModal, closeModal } from './scripts/modal.js';;
 import { enableValidation, clearValidation } from './scripts/validation.js'
-import { getUserInfo, getInitialInformation, changeProfileInfo, sendNewCard, removeCard, likeCard, changeAvatar, renderLoading } from './scripts/api.js';
+import { getInitialInformation, changeProfileInfo, sendNewCard, removeCardRequest, likeCardRequest, changeAvatar, renderLoading } from './scripts/api.js';
+
 
 const formInfoObj = {
     formSelector: '.popup__form',
@@ -12,6 +13,10 @@ const formInfoObj = {
     inputErrorClass: 'popup__input_type_error',
     errorClass: 'popup__error_visible'
 };
+
+
+const removeCard = removeCardWrapper(removeCardRequest, '.card');
+const likeCard = likeCardWrapper(likeCardRequest, '.card', 'card__like-button_is-active');
 
 document.querySelectorAll('.popup').forEach((popup) => {
     popup.addEventListener('mousedown', function(evt) {
@@ -33,7 +38,8 @@ const currentJob = document.querySelector(".profile__description")
 const editProfileForm = document.forms['edit-profile'];
 const profilePopupButton = profilePopup.querySelector(".popup__button");
 
-addFunctionalToSubmit(profilePopup, editProfileForm, function () {
+editProfileForm.addEventListener('submit', function (evt) {
+    evt.preventDefault();
     renderLoading(true, profilePopupButton);
     changeProfileInfo(editProfileForm.name.value, editProfileForm.description.value)
         .then((data) => {
@@ -45,7 +51,11 @@ addFunctionalToSubmit(profilePopup, editProfileForm, function () {
             }
         })
         .catch((err) => console.log(err))
-        .finally(() => renderLoading(false, profilePopupButton));
+        .finally(() => {
+            renderLoading(false, profilePopupButton)
+            closeModal(profilePopup);
+            editProfileForm.reset();
+        });
 });
 
 
@@ -79,38 +89,40 @@ const plusCard = document.querySelector(".profile__add-button");
 const cardForm = document.forms['new-place'];
 const plusPopupButton = plusPopup.querySelector(".popup__button");
 
-addFunctionalToSubmit(plusPopup, cardForm, function () {
+cardForm.addEventListener('submit', function (evt) {
+    evt.preventDefault()
     renderLoading(true, plusPopupButton);
     sendNewCard(cardForm['place-name'].value, cardForm['link'].value)
         .then((data) => {
             if (data) {
-                getUserInfo()
-                .then((user) => {
-                    cardsList.prepend(
-                        createCard({
-                            cardTemplate: cardTemplate,
-                            imgSrc: data.link,
-                            title: data.name,
-                            likes: data.likes,
-                            id: data._id
-                        },
-                        {
-                            removeFunction: removeCard,
-                            likeFunction: likeCard,
-                            openFunction: openCard
-                        },
-                        {
-                            cardOwner: data.owner._id,
-                            currentUser: user._id
-                        }),
-                    );
-                })
-            } else {
-                Promise.reject('Ошибка');
-            }
-        })
+                cardsList.prepend(
+                    createCard({
+                        cardTemplate: cardTemplate,
+                        imgSrc: data.link,
+                        title: data.name,
+                        likes: data.likes,
+                        id: data._id
+                    },
+                    {
+                        removeFunction: removeCard,
+                        likeFunction: likeCard,
+                        openFunction: openCard
+                    },
+                    {
+                        cardOwner: data.owner._id,
+                        currentUser: data.owner._id
+                    }),
+                );
+                } else {
+                    Promise.reject('Ошибка');
+                };
+            })
         .catch((err) => console.log(err))
-        .finally(() => renderLoading(false, plusPopupButton));
+        .finally(() => {
+            renderLoading(false, plusPopupButton)
+            closeModal(plusPopup);
+            cardForm.reset()
+        });
 });
 
 
@@ -132,7 +144,8 @@ avatarIcon.addEventListener('click', function (evt) {
     });
 });
 
-addFunctionalToSubmit(avatarPopup, avatarForm, function () {
+avatarForm.addEventListener('submit', function (evt) {
+    evt.preventDefault();
     renderLoading(true, avatarPopupButton);
     changeAvatar(avatarForm.avatar.value)
         .then((data) => {
@@ -143,7 +156,11 @@ addFunctionalToSubmit(avatarPopup, avatarForm, function () {
             };
         })
         .catch(err => console.log(err))
-        .finally(() => renderLoading(false, avatarPopupButton));
+        .finally(() => {
+            renderLoading(false, avatarPopupButton);
+            closeModal(avatarPopup);
+            avatarForm.reset();
+        });
     });
 
 
@@ -159,7 +176,7 @@ getInitialInformation()
             avatarIcon.setAttribute('style', `background-image: url(${user.avatar});`);
             resObj.cardsInfo.then((cards) => {
                 cards.forEach((item) => {
-                    cardsList.prepend(
+                    cardsList.append(
                         createCard({
                             cardTemplate: cardTemplate,
                             imgSrc: item.link,
