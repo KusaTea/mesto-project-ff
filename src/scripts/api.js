@@ -73,9 +73,7 @@ function likeCardRequest (card, method) {
         method: method,
         headers: {authorization: config.headers.authorization}
     })
-    .then((res) => {
-        return res.json()
-    });
+    .then(checkAnswer);
 }
 
 

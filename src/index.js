@@ -58,6 +58,8 @@ editProfileForm.addEventListener('submit', function (evt) {
             if (data) {
                 currentName.textContent = data.name;
                 currentJob.textContent = data.about;
+                closeModal(profilePopup);
+                editProfileForm.reset();
             } else {
                 Promise.reject('Ошибка')
             }
@@ -65,8 +67,6 @@ editProfileForm.addEventListener('submit', function (evt) {
         .catch((err) => console.log(err))
         .finally(() => {
             renderLoading(false, profilePopupButton)
-            closeModal(profilePopup);
-            editProfileForm.reset();
         });
 });
 
@@ -124,8 +124,10 @@ cardForm.addEventListener('submit', function (evt) {
                     {
                         cardOwner: data.owner._id,
                         currentUser: data.owner._id
-                    }),
+                    })
                 );
+                closeModal(plusPopup);
+                cardForm.reset()
                 } else {
                     Promise.reject('Ошибка');
                 };
@@ -133,8 +135,6 @@ cardForm.addEventListener('submit', function (evt) {
         .catch((err) => console.log(err))
         .finally(() => {
             renderLoading(false, plusPopupButton)
-            closeModal(plusPopup);
-            cardForm.reset()
         });
 });
 
@@ -164,6 +164,8 @@ avatarForm.addEventListener('submit', function (evt) {
         .then((data) => {
             if (data) {
                 avatarIcon.setAttribute('style', `background-image: url(${data.avatar});`);
+                closeModal(avatarPopup);
+                avatarForm.reset();
             } else {
                 Promise.reject('Ошибка');
             };
@@ -171,8 +173,6 @@ avatarForm.addEventListener('submit', function (evt) {
         .catch(err => console.log(err))
         .finally(() => {
             renderLoading(false, avatarPopupButton);
-            closeModal(avatarPopup);
-            avatarForm.reset();
         });
     });
 
